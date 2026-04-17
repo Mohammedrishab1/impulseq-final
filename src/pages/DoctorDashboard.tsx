@@ -122,19 +122,6 @@ export function DoctorDashboard() {
     }
   };
 
-  const callNext = async () => {
-    const nextPatient = waitingQueue[0];
-    if (!nextPatient) {
-      toast.info('No patients waiting');
-      return;
-    }
-    // If there's a current patient, complete them first
-    if (currentPatient) {
-      await markStatus(currentPatient.id, 2, 'Previous patient marked completed');
-    }
-    await markStatus(nextPatient.id, 1, `Now serving Token #${nextPatient.token_number}`);
-  };
-
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -188,14 +175,7 @@ export function DoctorDashboard() {
                   Token {currentPatient?.token_number ?? '--'}
                 </CardTitle>
               </div>
-              <Button
-                className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white h-11 px-5"
-                onClick={callNext}
-                disabled={!!actionLoading || waitingQueue.length === 0}
-              >
-                <Play className="w-4 h-4" />
-                Call Next
-              </Button>
+
             </CardHeader>
 
             <CardContent className="space-y-6">
@@ -286,14 +266,11 @@ export function DoctorDashboard() {
             <CardContent className="flex-1 space-y-3 max-h-[480px] overflow-y-auto pr-1">
               {waitingQueue.length > 0 ? (
                 waitingQueue.map((patient, index) => (
-                  <QueueRow
-                    key={patient.id}
-                    appt={patient}
-                    isFirst={index === 0}
-                    onCallNext={callNext}
-                    onMarkInProgress={() => markStatus(patient.id, 1, `Now serving #${patient.token_number}`)}
-                    loading={actionLoading === patient.id}
-                  />
+                    <QueueRow
+                      key={patient.id}
+                      appt={patient}
+                      isFirst={index === 0}
+                    />
                 ))
               ) : (
                 <div className="py-20 text-center text-slate-400">
@@ -329,13 +306,10 @@ function MiniInfo({ label, value }: { label: string; value: string }) {
 }
 
 function QueueRow({
-  appt, isFirst, onCallNext, onMarkInProgress, loading,
+  appt, isFirst
 }: {
   appt: Appointment;
   isFirst: boolean;
-  onCallNext: () => void;
-  onMarkInProgress: () => void;
-  loading: boolean;
 }) {
   return (
     <div
@@ -367,12 +341,7 @@ function QueueRow({
           {new Date(appt.appointment_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
-      {isFirst && (
-        <Button className="w-full mt-3 h-8 gap-1 shadow-sm text-xs" size="sm" onClick={onMarkInProgress} disabled={loading}>
-          {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
-          Serve Now
-        </Button>
-      )}
+
     </div>
   );
 }

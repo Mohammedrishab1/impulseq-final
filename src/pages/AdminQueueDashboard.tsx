@@ -11,6 +11,7 @@ import {
   Activity,
   CheckCircle2,
   Hourglass,
+  Play,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -123,6 +124,29 @@ export function AdminQueueDashboard() {
     }
   };
 
+  const callNext = async () => {
+    const waitingQueue = (appointments || []).filter(a => a.status === 0);
+    const inProgress = (appointments || []).find(a => a.status === 1);
+    const nextPatient = waitingQueue[0];
+    if (!nextPatient) {
+      toast.info('No patients waiting');
+      return;
+    }
+    setUpdatingId('call-next');
+    try {
+      if (inProgress) {
+        await updateStatus(inProgress.id, 2, inProgress.hospital_id);
+      }
+      await updateStatus(nextPatient.id, 1, nextPatient.hospital_id);
+      toast.success(`Now serving Token #${nextPatient.token_number}`);
+      await fetchData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to call next patient');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -143,10 +167,20 @@ export function AdminQueueDashboard() {
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        <Button variant="outline" className="gap-2 self-start" onClick={fetchData}>
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </Button>
+        <div className="flex gap-3 self-start">
+          <Button 
+            className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white" 
+            onClick={callNext}
+            disabled={updatingId === 'call-next' || stats.waiting === 0}
+          >
+            {updatingId === 'call-next' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+            Call Next Patient
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={fetchData}>
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Stats row */}

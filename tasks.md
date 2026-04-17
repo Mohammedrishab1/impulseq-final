@@ -1,138 +1,143 @@
-# 🛠️ ImpulseQ – Task List
+# 🏥 Hospital Token Management System – Task List
 
-## 🔥 Priority: CRITICAL (Fix Immediately)
+## 🎯 Objective
 
-### 1. Environment Variables
-- [x] Add to Vercel:
-  - `VITE_SUPABASE_URL`
-  - `VITE_SUPABASE_ANON_KEY`
-- [x] Validate usage in code
-- [x] Add runtime checks for missing values
+Implement a **priority-based dynamic queue system** and **move token control to admin dashboard** without breaking existing functionality.
 
 ---
 
-### 2. Supabase Setup
-- [x] Fix `supabase.ts`
-- [x] Ensure correct initialization
-- [x] Prevent undefined errors
-- [x] Add debug logs
+## 🧠 Queue System (Core Logic)
+
+### ✅ Tasks
+
+* [ ] Create/verify `patients_queue` table in database
+
+* [ ] Add fields:
+
+  * [ ] `id` (uuid)
+  * [ ] `name`
+  * [ ] `priority` (emergency / senior / normal)
+  * [ ] `status` (waiting / in-progress / completed)
+  * [ ] `created_at` (timestamp)
+
+* [ ] Remove dependency on fixed token numbers
+
+* [ ] Implement dynamic token calculation (based on queue position)
 
 ---
 
-### 3. Fix App Crash
-- [x] Identify blank screen cause
-- [x] Check console errors
-- [x] Fix failing API calls
-- [x] Ensure app renders fallback UI
+## 🔄 Patient Registration Flow
+
+* [ ] On receptionist registration:
+
+  * [ ] Insert patient into DB with `status = waiting`
+  * [ ] Fetch all active patients (waiting + in-progress)
+  * [ ] Sort by:
+
+    * [ ] Priority (emergency > senior > normal)
+    * [ ] Created time (ascending)
+  * [ ] Recalculate queue positions dynamically
 
 ---
 
-### 4. Remove Unsafe Redirects
-- [x] Search:
-  - `window.location`
-  - `location.href`
-- [x] Replace with `useNavigate()`
-- [x] Add safety check for `chrome-error`
+## ⚙️ Backend Functions
+
+* [ ] Create `getQueueWithTokens()`
+
+  * [ ] Fetch all active patients
+  * [ ] Apply sorting logic
+  * [ ] Assign token dynamically (index + 1)
+
+* [ ] Create `addPatientToQueue(patient)`
+
+  * [ ] Insert new patient
+  * [ ] Trigger queue recalculation
+
+* [ ] Create `completeCurrentPatient()`
+
+  * [ ] Mark first patient as `completed`
+  * [ ] Update queue automatically
 
 ---
 
-### 5. Fix Booking Logic
-- [x] Remove duplicate `canOverride`
-- [x] Prevent variable shadowing
-- [x] Ensure override logic works correctly
-- [x] Validate appointment creation flow
+## 🖥 Admin Dashboard
+
+* [ ] Add **"Call Next Patient"** button
+* [ ] On click:
+
+  * [ ] Fetch current queue
+  * [ ] Move first patient → `in-progress`
+  * [ ] Trigger update to frontend + ESP32
 
 ---
 
-## ⚙️ Priority: HIGH (Stability)
+## 👨‍⚕️ Doctor Dashboard
 
-### 6. Error Handling
-- [x] Add React Error Boundary
-- [x] Prevent full app crash
-- [x] Show fallback UI
+* [ ] REMOVE "Call Next Patient" button
+* [ ] Ensure doctor can:
 
----
-
-### 7. API Resilience
-- [x] Wrap all API calls in `try/catch`
-- [x] Handle Supabase failures gracefully
-- [x] Add user-friendly error messages
+  * [ ] View current patient
+  * [ ] Mark consultation as completed (optional)
+* [ ] Verify no UI or logic breaks
 
 ---
 
-### 8. Loading States
-- [x] Add loaders for all pages
-- [x] Prevent blank UI
-- [x] Improve UX during fetch
+## 🔌 ESP32 Integration
+
+* [ ] Create API endpoint:
+
+  * [ ] Return current token
+  * [ ] Return next token
+
+* [ ] Update ESP32 logic:
+
+  * [ ] Fetch data from API
+  * [ ] Display on OLED:
+
+    * Current token
+    * Next token
 
 ---
 
-## 🚀 Priority: MEDIUM (Deployment)
+## 🔄 Backward Compatibility
 
-### 9. Vercel Fixes
-- [x] Verify env variables
-- [x] Check build logs
-- [x] Fix deployment errors
-- [x] Confirm correct routing
-
----
-
-### 10. Debugging Setup
-- [x] Add console logs:
-  - App init
-  - Supabase calls
-  - Errors
-- [x] Use DevTools:
-  - Network tab
-  - Console
+* [ ] Ensure existing APIs still work
+* [ ] Avoid breaking schema (only extend if needed)
+* [ ] Test old flows (doctor + receptionist)
+* [ ] Maintain Supabase real-time subscriptions
 
 ---
 
 ## 🧪 Testing
 
-### Manual Tests
-- [x] App loads successfully
-- [x] Booking works
-- [x] Queue updates
-- [x] Dashboard renders correctly
+* [ ] Test empty queue scenario
+* [ ] Test multiple patients with different priorities
+* [ ] Test real-time updates
+* [ ] Test ESP32 display sync
+* [ ] Test admin calling next patient
+* [ ] Test doctor dashboard stability
 
 ---
 
-### Edge Cases
-- [ ] No internet
-- [ ] Missing env variables
-- [ ] Invalid user session
-- [ ] Empty database
+## 🚀 Optional Enhancements
+
+* [ ] Add estimated wait time
+* [ ] Add queue preview for receptionist
+* [ ] Add buzzer/sound alert on token call
+* [ ] Add patient SMS/notification system
 
 ---
 
-## 📈 Future Tasks
+## ✅ Final Checklist
 
-### Architecture
-- [ ] Add global state (Zustand)
-- [ ] Create service layer
-- [ ] Clean folder structure
-
----
-
-### Features
-- [ ] IoT device integration
-- [ ] Smart token system
-- [ ] Notification system
+* [ ] Dynamic queue working
+* [ ] Priority sorting correct
+* [ ] Admin controls working
+* [ ] Doctor dashboard stable
+* [ ] ESP32 synced
+* [ ] No breaking changes
 
 ---
 
-### Performance
-- [ ] Code splitting
-- [ ] Lazy loading
-- [ ] Optimize queries
-
----
-
-## ✅ Definition of Done
-
-- [ ] No crashes
-- [ ] No unsafe redirect errors
-- [ ] Stable booking system
-- [ ] Clean deployment on Vercel
-- [ ] Smooth user experience
+**Status:** ⏳ In Progress
+**Priority:** 🔥 High
