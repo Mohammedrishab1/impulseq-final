@@ -14,25 +14,37 @@ export function useQueueTokens(hospitalId: string) {
   const errorCount = useRef(0);
 
   const loadQueue = useCallback(async () => {
-    if (!hospitalId || isFetching.current) return;
+    if (!hospitalId) {
+      setLoading(false);
+      return;
+    }
+    
+    if (isFetching.current) return;
     
     // Stop polling if errors exceed threshold
-    if (errorCount.current >= 3) return;
+    if (errorCount.current >= 3) {
+      setLoading(false);
+      return;
+    }
 
     // Check if the tab is visible to save requests
     if (document.hidden) return;
 
     isFetching.current = true;
     try {
+      console.log("Fetching queue for hospital:", hospitalId);
       const data = await fetchQueue(hospitalId);
-      setQueue(data);
+      console.log("Queue data received:", data.length, "items");
+      setQueue(data || []);
       cache[hospitalId] = data; // Update cache
       setError(null);
       errorCount.current = 0; // Reset on success
     } catch (err: any) {
-      console.error("TOKEN ERROR:", err);
+      console.error("TOKEN FETCH ATTEMPT FAILED:", err);
       setError(err.message || "Failed to load queue tokens.");
       errorCount.current += 1;
+      // If it's a first load failure, we still want to stop the spinner
+      setQueue([]);
     } finally {
       setLoading(false);
       isFetching.current = false;

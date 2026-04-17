@@ -151,7 +151,7 @@ export function HospitalAdminDashboard() {
             <CardContent className="h-[300px]">
               {queue && queue.length > 0 ? (
                 <div style={{ width: "100%", height: 300 }}>
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={inflowData}>
                       <defs>
                         <linearGradient id="colorPatients" x1="0" y1="0" x2="0" y2="1">

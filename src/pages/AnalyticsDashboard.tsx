@@ -223,7 +223,7 @@ export function AnalyticsDashboard() {
           <CardContent className="w-full h-[300px] min-h-[300px]">
             {queue && queue.length > 0 ? (
               <div style={{ width: "100%", height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={waitTimeTrends}>
                   <defs>
                     <linearGradient id="colorWait" x1="0" y1="0" x2="0" y2="1">
@@ -265,7 +265,7 @@ export function AnalyticsDashboard() {
           <CardContent className="w-full h-[300px] min-h-[300px]">
             {queue && queue.length > 0 ? (
               <div style={{ width: "100%", height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={peakHourData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
@@ -297,7 +297,7 @@ export function AnalyticsDashboard() {
           <CardContent className="w-full h-[300px] min-h-[300px] flex flex-col items-center justify-center">
             {queue && queue.length > 0 ? (
               <div style={{ width: "100%", height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                   <Pie
                     data={satisfactionData}

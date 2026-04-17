@@ -113,11 +113,120 @@ export function ReceptionDashboard() {
   const currentToken = queue.find(q => q.status === 1);
   const nextWaitingTokens = queue.filter(q => q.status === 0).sort((a,b) => a.token_number - b.token_number).slice(0, 2);
 
-  if (loading && queue.length === 0) {
+  // Debug Logging
+  React.useEffect(() => {
+    console.log("Reception Dashboard State:", {
+      hospitalId,
+      queueLength: queue.length,
+      loading,
+      currentToken: currentToken?.token_number
+    });
+  }, [hospitalId, queue, loading, currentToken]);
+
+  // 1. Session Validation
+  if (!hospitalId) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-6 p-8 text-center">
+        <div className="w-20 h-20 rounded-full bg-rose-50 flex items-center justify-center">
+          <AlertCircle className="w-10 h-10 text-rose-500" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-slate-900">No Hospital Session Found</h3>
+          <p className="text-slate-500 mt-2 max-w-sm">
+            Your login session is missing the required facility ID. Please log in again to access the dashboard.
+          </p>
+        </div>
+        <Button onClick={() => navigate('/login')} className="gap-2">
+          Return to Login
+        </Button>
+      </div>
+    );
+  }
+
+  // 2. Loading State
+  if (loading) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-12 h-12 text-primary animate-spin" />
-        <p className="text-slate-500 font-medium">Loading live queue tracking...</p>
+        <p className="text-slate-500 font-medium">Synchronizing live queue data...</p>
+      </div>
+    );
+  }
+
+  // 3. Empty State (Only if not loading)
+  if (!loading && queue.length === 0 && !searchTerm) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Front Desk & Queue Link</h1>
+            <p className="text-slate-500">Live ESP32 integration dashboard</p>
+          </div>
+          <Button className="gap-2 h-11 px-6 rounded-full shadow-lg" onClick={() => setShowBooking(true)}>
+            <UserPlus className="w-5 h-5" />
+            New Registration
+          </Button>
+        </div>
+
+        <Card className="p-20 text-center flex flex-col items-center gap-5 bg-slate-50 border-dashed border-2">
+          <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center border-4 border-white shadow-sm">
+            <Ticket className="w-10 h-10 text-slate-300" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-slate-900">Queue is Currently Empty</h3>
+            <p className="text-slate-500 mt-1 max-w-sm">
+              There are no active or waiting tokens for this hospital today. Start by registering a patient.
+            </p>
+          </div>
+          <Button
+            className="mt-2 px-8 h-12 rounded-full gap-2"
+            onClick={() => setShowBooking(true)}
+          >
+            <Plus className="w-4 h-4" />
+            Issue First Token
+          </Button>
+        </Card>
+
+        {/* Re-render booking modal in empty state to allow interaction */}
+        {showBooking && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md shadow-2xl">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Register Patient</CardTitle>
+                <button onClick={() => setShowBooking(false)} className="p-1 hover:bg-slate-100 rounded-md">
+                  <X className="w-5 h-5 text-slate-500" />
+                </button>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleBook} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700">Patient</label>
+                    <select
+                      className="w-full h-11 px-3 rounded-lg border border-slate-200 bg-white text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none"
+                      value={bookingForm.patient_id}
+                      onChange={(e) => setBookingForm({ patient_id: e.target.value })}
+                      required
+                    >
+                      <option value="">Select a patient...</option>
+                      {patients.map((p) => (
+                        <option key={p.id} value={p.id}>{p.name} ({p.phone})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <Button type="submit" className="flex-1 h-11 gap-2" disabled={isBooking}>
+                      {isBooking ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                      {isBooking ? 'Registering...' : 'Issue Token'}
+                    </Button>
+                    <Button type="button" variant="outline" className="flex-1 h-11" onClick={() => setShowBooking(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     );
   }

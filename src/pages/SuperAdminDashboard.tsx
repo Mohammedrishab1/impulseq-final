@@ -143,7 +143,7 @@ export function SuperAdminDashboard() {
           <CardContent className="w-full h-[300px]">
             {queue && queue.length > 0 ? (
               <div style={{ width: "100%", height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={flowData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
@@ -174,7 +174,7 @@ export function SuperAdminDashboard() {
           <CardContent className="w-full h-[300px]">
             {performanceData && performanceData.length > 0 ? (
               <div style={{ width: "100%", height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={performanceData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
