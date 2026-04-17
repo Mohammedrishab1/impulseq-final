@@ -54,14 +54,20 @@ export function AdminQueueDashboard() {
   const hospitalId = getSessionHospitalId();
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
+  const isFetching = React.useRef(false);
+
   const fetchData = React.useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
     try {
       const data = await getAppointments(hospitalId || undefined);
       setAppointments(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Admin queue fetch error:', err);
-      toast.error('Failed to load schedule');
+      toast.error(err.message || 'Failed to load schedule');
+      return; // Stop execution on error
     } finally {
+      isFetching.current = false;
       setLoading(false);
     }
   }, [hospitalId]);

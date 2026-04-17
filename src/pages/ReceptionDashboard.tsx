@@ -55,8 +55,10 @@ export function ReceptionDashboard() {
   const [isCalling, setIsCalling] = React.useState(false);
 
   React.useEffect(() => {
-    getPatients().then((p) => setPatients(p || [])).catch(() => {});
-  }, []);
+  if (showBooking) {
+    getPatients().then((p) => setPatients(p || []));
+  }
+}, [showBooking]);
 
   const handleBook = async (e: React.FormEvent) => {
     e.preventDefault();

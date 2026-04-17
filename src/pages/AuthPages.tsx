@@ -16,7 +16,7 @@ export function LoginPage() {
 
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    
+
     if (!email || !password) {
       toast.error("Please enter email and password");
       return;
@@ -27,8 +27,8 @@ export function LoginPage() {
       // Query custom "users" table — no Supabase Auth used
       const { data, error } = await supabase
         .from("users")
-        .select("*")
-        .eq("email", email)
+        .select("id,email,password,role,hospital_id")
+        .eq("email", email.toLowerCase().trim())
         .maybeSingle();
 
       if (error) {
@@ -49,20 +49,20 @@ export function LoginPage() {
       }
 
       // ── Store full session in localStorage ─────────────────────────────────
-      localStorage.setItem("user_id",       data.id          ?? "");
-      localStorage.setItem("user_email",    data.email       ?? "");
-      localStorage.setItem("user_role",     String(data.role ?? ""));
-      localStorage.setItem("hospital_id",   data.hospital_id ?? "");
+      localStorage.setItem("user_id", data.id ?? "");
+      localStorage.setItem("user_email", data.email ?? "");
+      localStorage.setItem("user_role", String(data.role ?? ""));
+      localStorage.setItem("hospital_id", data.hospital_id ?? "");
 
       toast.success("Login successful");
 
       // ── Role-based redirect ────────────────────────────────────────────────
       const role = String(data.role ?? "").toLowerCase();
-      if (role === "patient"   || role === "0") navigate("/patient");
-      else if (role === "doctor"    || role === "3") navigate("/doctor");
+      if (role === "patient" || role === "0") navigate("/patient");
+      else if (role === "doctor" || role === "3") navigate("/doctor");
       else if (role === "reception" || role === "2") navigate("/reception");
-      else if (role === "queue_admin")               navigate("/queue-admin");
-      else                                           navigate("/super-admin"); // admin / unknown
+      else if (role === "queue_admin") navigate("/queue-admin");
+      else navigate("/super-admin"); // admin / unknown
 
     } catch (error: any) {
       console.error("Login error:", error);
@@ -94,12 +94,12 @@ export function LoginPage() {
                 <label className="text-sm font-bold text-slate-700">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input 
+                  <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@hospital.com" 
-                    className="pl-10 h-11" 
+                    placeholder="name@hospital.com"
+                    className="pl-10 h-11"
                     required
                   />
                 </div>
@@ -111,17 +111,17 @@ export function LoginPage() {
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input 
-                    type="password" 
+                  <Input
+                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••" 
-                    className="pl-10 h-11" 
+                    placeholder="••••••••"
+                    className="pl-10 h-11"
                     required
                   />
                 </div>
               </div>
-              <Button 
+              <Button
                 type="submit"
                 className="w-full h-11 gap-2 text-base font-bold shadow-lg shadow-primary/20"
                 disabled={loading}
@@ -178,25 +178,25 @@ export function ForgotPasswordPage() {
                 <label className="text-sm font-bold text-slate-700">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input 
+                  <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@hospital.com" 
-                    className="pl-10 h-11" 
+                    placeholder="name@hospital.com"
+                    className="pl-10 h-11"
                     required
                   />
                 </div>
               </div>
-              <Button 
+              <Button
                 type="submit"
                 className="w-full h-11 gap-2 text-base font-bold shadow-lg shadow-primary/20"
                 disabled={loading}
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Request Reset"}
               </Button>
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="inline-flex items-center justify-center w-full h-11 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 Back to Login

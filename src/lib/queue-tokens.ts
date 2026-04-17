@@ -15,13 +15,11 @@ export const fetchQueue = async (hospitalId: string): Promise<QueueToken[]> => {
   
   const { data, error } = await supabase
     .from("queue_tokens")
-    .select(`
-      *,
-      patients!inner ( name, phone )
-    `)
+    .select("id, token_number, status, patient_id, patients(name, phone)") // optimized minimal fetch
     .eq("hospital_id", hospitalId)
     .in("status", [0, 1]) // Only fetch waiting and in-progress for display
-    .order("token_number", { ascending: true });
+    .order("token_number", { ascending: true })
+    .limit(20);
 
   if (error) {
     console.error("Error fetching queue:", error.message);

@@ -43,25 +43,31 @@ export function AnalyticsDashboard() {
   const [priorityQueue, setPriorityQueue] = React.useState<any[]>([]);
   const [iotData, setIotData] = React.useState<any[]>([]);
 
+  const isFetching = React.useRef(false);
+
   React.useEffect(() => {
     async function fetchData() {
+      if (isFetching.current) return;
+      isFetching.current = true;
       try {
         setLoading(true);
-        const [patientsData, queueData, priorityData, iot] = await Promise.all([
-          getPatients(),
+        // Load ONLY essential data on initial render, disable patients & iot data temporarily
+        const [queueData, priorityData] = await Promise.all([
           getQueue(),
-          getPriorityQueue(),
-          getIoTData()
+          getPriorityQueue()
         ]);
-        setPatients(patientsData || []);
         setQueue(queueData || []);
         setPriorityQueue(priorityData || []);
-        setIotData(iot || []);
+        setPatients([]); // Lazy load later or disabled temporarily
+        setIotData([]); // Disabled temporarily to reduce dashboard load
+        setError(null);
       } catch (err: any) {
         console.error("Error fetching analytics data:", err);
         setError(err.message || "Failed to load dashboard data");
+        return; // STOP retry loop
       } finally {
         setLoading(false);
+        isFetching.current = false;
       }
     }
     fetchData();
@@ -214,31 +220,33 @@ export function AnalyticsDashboard() {
             <CardTitle>Waiting Time Trends</CardTitle>
             <CardDescription>Average patient wait time aggregated by weekday</CardDescription>
           </CardHeader>
-          <CardContent className="w-full h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={waitTimeTrends}>
-                <defs>
-                  <linearGradient id="colorWait" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <Tooltip 
-                  contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="time" 
-                  stroke="var(--color-primary)" 
-                  fillOpacity={1} 
-                  fill="url(#colorWait)" 
-                  strokeWidth={3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <CardContent className="w-full h-[300px] min-h-[300px]">
+            {waitTimeTrends && waitTimeTrends.length > 0 && (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={waitTimeTrends}>
+                  <defs>
+                    <linearGradient id="colorWait" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <Tooltip 
+                    contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="time" 
+                    stroke="var(--color-primary)" 
+                    fillOpacity={1} 
+                    fill="url(#colorWait)" 
+                    strokeWidth={3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -247,19 +255,21 @@ export function AnalyticsDashboard() {
             <CardTitle>Peak Hour Analysis</CardTitle>
             <CardDescription>Token distribution by registration time</CardDescription>
           </CardHeader>
-          <CardContent className="w-full h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={peakHourData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <Tooltip 
-                  cursor={{fill: '#f8fafc'}}
-                  contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}}
-                />
-                <Bar dataKey="count" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent className="w-full h-[300px] min-h-[300px]">
+            {peakHourData && peakHourData.length > 0 && (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={peakHourData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <Tooltip 
+                    cursor={{fill: '#f8fafc'}}
+                    contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}}
+                  />
+                  <Bar dataKey="count" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -270,25 +280,27 @@ export function AnalyticsDashboard() {
             <CardTitle>Feedback Analysis</CardTitle>
             <CardDescription>Live data from IoT terminal responses</CardDescription>
           </CardHeader>
-          <CardContent className="w-full h-[300px] flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={satisfactionData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {satisfactionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+          <CardContent className="w-full h-[300px] min-h-[300px] flex flex-col items-center justify-center">
+            {satisfactionData && satisfactionData.length > 0 && (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={satisfactionData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {satisfactionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
             <div className="space-y-2">
               {satisfactionData.map((item, index) => (
                 <div key={item.name} className="flex items-center gap-2">

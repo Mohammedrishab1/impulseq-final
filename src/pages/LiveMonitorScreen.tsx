@@ -20,10 +20,19 @@ export function LiveMonitorScreen() {
   const [iotData, setIotData] = React.useState<any[]>([]);
   const [currentTime, setCurrentTime] = React.useState(new Date());
 
+  const isFetching = React.useRef(false);
+  const errorCount = React.useRef(0);
+
   React.useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     
     async function fetchData() {
+      if (isFetching.current) return;
+      if (document.hidden) return; // don't poll if hidden
+      // Stop polling if errors exceed threshold
+      if (errorCount.current >= 3) return;
+
+      isFetching.current = true;
       try {
         const [queueData, iot] = await Promise.all([
           getQueue(),
@@ -31,15 +40,25 @@ export function LiveMonitorScreen() {
         ]);
         setQueue(queueData || []);
         setIotData(iot || []);
+        errorCount.current = 0;
       } catch (err) {
         console.error("Monitor fetch error:", err);
+        errorCount.current += 1;
+        return; // stop execution
       } finally {
         setLoading(false);
+        isFetching.current = false;
       }
     }
     
     fetchData();
-    const poll = setInterval(fetchData, 10000); // Poll every 10s for live feel
+    const poll = setInterval(() => {
+      if (errorCount.current >= 3) {
+        clearInterval(poll);
+        return;
+      }
+      fetchData();
+    }, 10000); // Poll every 10s
 
     return () => {
       clearInterval(timer);
