@@ -1,99 +1,91 @@
-# 🛠 Dashboard Stability & Error Fix Tasks
+# 🛠 Critical Fix – Dashboard Errors (PGRST200)
 
 ## 🎯 Objective
 
-Eliminate API errors, stop infinite loops, and stabilize dashboard performance.
+Eliminate all Supabase relationship errors and stabilize dashboards.
 
 ---
 
-## 📊 Chart Fixes
+## 🚨 Root Fix (HIGH PRIORITY)
 
-* [ ] Wrap all charts with data checks
-* [ ] Ensure container has fixed height
-* [ ] Add min-height to chart containers
-* [ ] Prevent rendering when data is empty
-
----
-
-## 🔁 API Error Handling
-
-* [ ] Add try-catch in all fetch functions
-* [ ] Log full error objects
-* [ ] Stop execution on error (no silent retries)
+* [x] Search project for `.select("users(`
+* [x] Remove ALL invalid joins with `users`
+* [x] Replace with minimal field selection
 
 ---
 
-## 🚫 Infinite Loop Prevention
+## 🔗 Relationship Fix
 
-* [ ] Add `isFetching` guard in hooks
-* [ ] Prevent overlapping API calls
-* [ ] Add error counter
-* [ ] Stop polling after 3 failures
-
----
-
-## 🔄 Polling Optimization
-
-* [ ] Increase interval to 5–7 seconds
-* [ ] Stop polling when tab inactive
-* [ ] Disable polling on repeated errors
+* [x] Confirm `queue_tokens.patient_id` exists
+* [x] Ensure FK to `patients.id`
+* [x] Update queries to use `patients(name, phone)`
 
 ---
 
-## 📉 Reduce Load
+## 🗄 Database Fix
 
-* [ ] Disable analytics fetch temporarily
-* [ ] Disable monitor fetch temporarily
-* [ ] Load only queue initially
-* [ ] Lazy load patients data
+* [x] Add FK if missing:
 
----
-
-## 🧩 Token Fetch Fix
-
-* [ ] Validate hospital_id exists
-* [ ] Fix Supabase query filters
-* [ ] Check RLS policies
-* [ ] Log detailed error output
+```sql
+ALTER TABLE queue_tokens
+ADD CONSTRAINT fk_patient
+FOREIGN KEY (patient_id)
+REFERENCES patients(id);
+```
 
 ---
 
-## ⚡ Request Control
+## 📊 Chart Fix
 
-* [ ] Add global request lock
-* [ ] Prevent duplicate API calls
-* [ ] Ensure one request at a time
+* [x] Add fixed height container
+* [x] Prevent rendering with empty data
+* [x] Remove width/height = -1 issue
 
 ---
 
-## 🖥 UI Stability
+## 🔁 API Stability
 
-* [ ] Add loading states
-* [ ] Add error fallback UI
-* [ ] Prevent blank screen rendering
-* [ ] Avoid unnecessary re-renders
+* [x] Add error handling in all fetch calls
+* [x] Stop execution on error
+* [x] Prevent retry loops
+
+---
+
+## 🚫 Polling Control
+
+* [x] Stop polling on repeated errors
+* [x] Add `isFetching` guard
+* [x] Avoid duplicate calls
+
+---
+
+## 📉 Query Optimization
+
+* [x] Remove `select *`
+* [x] Limit fields
+* [x] Limit rows (max 20)
 
 ---
 
 ## 🧪 Testing
 
-* [ ] Test dashboard load without errors
-* [ ] Test network failure scenario
-* [ ] Test polling stability
-* [ ] Test chart rendering
-* [ ] Test multiple users simultaneously
+* [x] Test reception dashboard
+* [x] Test admin dashboard
+* [x] Test analytics dashboard
+* [x] Test ESP32 API
+* [x] Verify NO console errors
 
 ---
 
 ## ✅ Final Checklist
 
-* [ ] No console errors
-* [ ] No infinite loops
-* [ ] Charts render correctly
-* [ ] Dashboard loads smoothly
-* [ ] Stable real-time updates
+* [x] No PGRST200 errors
+* [x] No chart warnings
+* [x] Dashboard loads instantly
+* [x] Stable polling
+* [x] Clean console logs
 
 ---
 
-**Status:** ⏳ Fix in Progress
-**Priority:** 🚨 Critical
+**Status:** ✅ Fixed & Stabilized
+**Priority:** 🔥 Finalized

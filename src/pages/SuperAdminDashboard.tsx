@@ -46,8 +46,12 @@ export function SuperAdminDashboard() {
   const [queue, setQueue] = React.useState<any[]>([]);
   const [patients, setPatients] = React.useState<any[]>([]);
 
+  const isFetching = React.useRef(false);
+
   React.useEffect(() => {
     async function fetchData() {
+      if (isFetching.current) return;
+      isFetching.current = true;
       try {
         const [hosp, q, p] = await Promise.all([
           getHospitals(),
@@ -61,6 +65,7 @@ export function SuperAdminDashboard() {
         console.error("Dashboard fetch error:", err);
       } finally {
         setLoading(false);
+        isFetching.current = false;
       }
     }
     fetchData();
@@ -136,22 +141,26 @@ export function SuperAdminDashboard() {
             <CardDescription>Total patients served across all hospitals this week</CardDescription>
           </CardHeader>
           <CardContent className="w-full h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={flowData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <Tooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
-                <Line 
-                  type="monotone" 
-                  dataKey="patients" 
-                  stroke="var(--color-primary)" 
-                  strokeWidth={3} 
-                  dot={{r: 4, fill: 'var(--color-primary)', strokeWidth: 2, stroke: '#fff'}} 
-                  activeDot={{r: 6}}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {queue && queue.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={flowData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <Tooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="patients" 
+                    stroke="var(--color-primary)" 
+                    strokeWidth={3} 
+                    dot={{r: 4, fill: 'var(--color-primary)', strokeWidth: 2, stroke: '#fff'}} 
+                    activeDot={{r: 6}}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-[300px] flex items-center justify-center text-slate-400">No stream data available.</div>
+            )}
           </CardContent>
         </Card>
 
@@ -161,19 +170,23 @@ export function SuperAdminDashboard() {
             <CardDescription>Average waiting time (minutes) per facility</CardDescription>
           </CardHeader>
           <CardContent className="w-full h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={performanceData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
-                <Bar dataKey="wait" radius={[4, 4, 0, 0]}>
-                  {performanceData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {performanceData && performanceData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={performanceData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
+                  <Bar dataKey="wait" radius={[4, 4, 0, 0]}>
+                    {performanceData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-[300px] flex items-center justify-center text-slate-400">No performance data available.</div>
+            )}
           </CardContent>
         </Card>
       </div>

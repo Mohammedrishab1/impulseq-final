@@ -221,7 +221,7 @@ export function AnalyticsDashboard() {
             <CardDescription>Average patient wait time aggregated by weekday</CardDescription>
           </CardHeader>
           <CardContent className="w-full h-[300px] min-h-[300px]">
-            {waitTimeTrends && waitTimeTrends.length > 0 && (
+            {queue && queue.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={waitTimeTrends}>
                   <defs>
@@ -246,6 +246,11 @@ export function AnalyticsDashboard() {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
+                <p>No waiting time data available</p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -256,7 +261,7 @@ export function AnalyticsDashboard() {
             <CardDescription>Token distribution by registration time</CardDescription>
           </CardHeader>
           <CardContent className="w-full h-[300px] min-h-[300px]">
-            {peakHourData && peakHourData.length > 0 && (
+            {queue && queue.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={peakHourData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -269,6 +274,11 @@ export function AnalyticsDashboard() {
                   <Bar dataKey="count" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
+                <p>No peak hour data available</p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -281,7 +291,7 @@ export function AnalyticsDashboard() {
             <CardDescription>Live data from IoT terminal responses</CardDescription>
           </CardHeader>
           <CardContent className="w-full h-[300px] min-h-[300px] flex flex-col items-center justify-center">
-            {satisfactionData && satisfactionData.length > 0 && (
+            {queue && queue.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -300,6 +310,11 @@ export function AnalyticsDashboard() {
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 py-12">
+                <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
+                <p>No IoT feedback data available</p>
+              </div>
             )}
             <div className="space-y-2">
               {satisfactionData.map((item, index) => (

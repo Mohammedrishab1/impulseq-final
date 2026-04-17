@@ -11,7 +11,7 @@ export const getPatients = async () => {
 export const getQueue = async () => {
   const { data, error } = await supabase
     .from("queue_tokens")
-    .select("*, users(name, email)");
+    .select("id, token_number, status, patient_id, department, wait_time, created_at, patients(name, phone)");
   if (error) throw error;
   return data;
 };
@@ -41,7 +41,7 @@ export const getESP32Tokens = async (hospitalId: string) => {
 export const getPriorityQueue = async () => {
   const { data, error } = await supabase
     .from("priority_queue")
-    .select("*, users(name, email)");
+    .select("id, token_number, status, patient_id, department, wait_time, created_at, patients(name, phone)");
   if (error) throw error;
   return data;
 };

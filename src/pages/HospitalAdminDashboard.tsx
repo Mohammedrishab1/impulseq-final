@@ -35,8 +35,12 @@ export function HospitalAdminDashboard() {
   const [patients, setPatients] = React.useState<any[]>([]);
   const [priorityQueue, setPriorityQueue] = React.useState<any[]>([]);
 
+  const isFetching = React.useRef(false);
+
   React.useEffect(() => {
     async function fetchData() {
+      if (isFetching.current) return;
+      isFetching.current = true;
       try {
         const [q, p, pq] = await Promise.all([
           getQueue(),
@@ -50,6 +54,7 @@ export function HospitalAdminDashboard() {
         console.error("Hospital dashboard fetch error:", err);
       } finally {
         setLoading(false);
+        isFetching.current = false;
       }
     }
     fetchData();
@@ -144,21 +149,25 @@ export function HospitalAdminDashboard() {
               <CardDescription>Real-time patient arrivals by hour from Supabase</CardDescription>
             </CardHeader>
             <CardContent className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={inflowData}>
-                  <defs>
-                    <linearGradient id="colorPatients" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                  <Tooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
-                  <Area type="monotone" dataKey="patients" stroke="var(--color-primary)" fillOpacity={1} fill="url(#colorPatients)" strokeWidth={3} />
-                </AreaChart>
-              </ResponsiveContainer>
+              {queue && queue.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={inflowData}>
+                    <defs>
+                      <linearGradient id="colorPatients" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                    <Tooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
+                    <Area type="monotone" dataKey="patients" stroke="var(--color-primary)" fillOpacity={1} fill="url(#colorPatients)" strokeWidth={3} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="w-full h-[300px] flex items-center justify-center text-slate-400">No stream data available.</div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -190,11 +199,11 @@ export function HospitalAdminDashboard() {
               {priorityQueue.slice(0, 3).map((item) => (
                 <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                    {item.users?.name?.charAt(0) || 'P'}
+                    {item.patients?.name?.charAt(0) || 'P'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">{item.users?.name}</p>
-                    <p className="text-[10px] text-slate-400 truncate">{item.users?.email}</p>
+                    <p className="text-sm font-medium text-slate-900 truncate">{item.patients?.name || 'Unknown'}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{item.patients?.phone || ''}</p>
                     <p className="text-xs text-slate-500 truncate">{item.department} • Priority {item.priority_level || 'High'}</p>
                   </div>
                   <div className="text-right">
