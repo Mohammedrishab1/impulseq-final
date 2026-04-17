@@ -67,10 +67,12 @@ export function PatientDashboard() {
         getPatientHistory(patientId, 10, 0)
       ]);
       
-      console.log('--- Debug: Patient Fetch Pipeline ---');
-      console.log('Active Appointment:', data);
-      console.log('History Offset 0:', hist);
-      console.log('-----------------------------------');
+      if (data) {
+        console.log('--- Debug: Patient Fetch Pipeline ---');
+        console.log('Active Appointment:', data);
+        console.log('History Offset 0:', hist);
+        console.log('-----------------------------------');
+      }
 
       setAppointment(data);
       setAhead(data ? Math.max(0, data.token_number - 1) : 0);

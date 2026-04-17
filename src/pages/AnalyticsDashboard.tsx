@@ -222,8 +222,9 @@ export function AnalyticsDashboard() {
           </CardHeader>
           <CardContent className="w-full h-[300px] min-h-[300px]">
             {queue && queue.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={waitTimeTrends}>
+              <div style={{ width: "100%", height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={waitTimeTrends}>
                   <defs>
                     <linearGradient id="colorWait" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
@@ -245,7 +246,8 @@ export function AnalyticsDashboard() {
                     strokeWidth={3}
                   />
                 </AreaChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
                 <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
@@ -262,8 +264,9 @@ export function AnalyticsDashboard() {
           </CardHeader>
           <CardContent className="w-full h-[300px] min-h-[300px]">
             {queue && queue.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={peakHourData}>
+              <div style={{ width: "100%", height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={peakHourData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
                   <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
@@ -273,7 +276,8 @@ export function AnalyticsDashboard() {
                   />
                   <Bar dataKey="count" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
                 <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
@@ -292,8 +296,9 @@ export function AnalyticsDashboard() {
           </CardHeader>
           <CardContent className="w-full h-[300px] min-h-[300px] flex flex-col items-center justify-center">
             {queue && queue.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+              <div style={{ width: "100%", height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
                   <Pie
                     data={satisfactionData}
                     cx="50%"
@@ -309,7 +314,8 @@ export function AnalyticsDashboard() {
                   </Pie>
                   <Tooltip />
                 </PieChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 py-12">
                 <AlertCircle className="w-8 h-8 mb-2 opacity-50" />

@@ -150,21 +150,23 @@ export function HospitalAdminDashboard() {
             </CardHeader>
             <CardContent className="h-[300px]">
               {queue && queue.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={inflowData}>
-                    <defs>
-                      <linearGradient id="colorPatients" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                    <Tooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
-                    <Area type="monotone" dataKey="patients" stroke="var(--color-primary)" fillOpacity={1} fill="url(#colorPatients)" strokeWidth={3} />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <div style={{ width: "100%", height: 300 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={inflowData}>
+                      <defs>
+                        <linearGradient id="colorPatients" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
+                          <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                      <Tooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
+                      <Area type="monotone" dataKey="patients" stroke="var(--color-primary)" fillOpacity={1} fill="url(#colorPatients)" strokeWidth={3} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               ) : (
                 <div className="w-full h-[300px] flex items-center justify-center text-slate-400">No stream data available.</div>
               )}
@@ -204,10 +206,10 @@ export function HospitalAdminDashboard() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-900 truncate">{item.patients?.name || 'Unknown'}</p>
                     <p className="text-[10px] text-slate-400 truncate">{item.patients?.phone || ''}</p>
-                    <p className="text-xs text-slate-500 truncate">{item.department} • Priority {item.priority_level || 'High'}</p>
+                    <p className="text-xs text-slate-500 truncate">{item.queue_tokens?.department} • Priority {item.priority || 'High'}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-bold text-slate-900">{item.token_number}</p>
+                    <p className="text-xs font-bold text-slate-900">{item.queue_tokens?.token_number}</p>
                     <Badge variant="outline" className="text-[10px] h-4 px-1">URGENT</Badge>
                   </div>
                 </div>

@@ -41,7 +41,16 @@ export const getESP32Tokens = async (hospitalId: string) => {
 export const getPriorityQueue = async () => {
   const { data, error } = await supabase
     .from("priority_queue")
-    .select("id, token_number, status, patient_id, department, wait_time, created_at, patients(name, phone)");
+    .select(`
+      id,
+      priority,
+      status,
+      queue_tokens (
+        token_number,
+        department,
+        created_at
+      )
+    `);
   if (error) throw error;
   return data;
 };
