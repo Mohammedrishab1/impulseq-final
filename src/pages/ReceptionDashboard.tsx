@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   UserPlus, 
@@ -38,6 +39,7 @@ function getSessionHospitalId(): string {
 }
 
 export function ReceptionDashboard() {
+  const navigate = useNavigate();
   const [loading, setLoading] = React.useState(true);
   const [queue, setQueue] = React.useState<any[]>([]);
   const [patients, setPatients] = React.useState<any[]>([]);
@@ -243,7 +245,7 @@ export function ReceptionDashboard() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="secondary" className="h-12 px-8" onClick={() => window.location.reload()}>Refresh</Button>
+              <Button variant="secondary" className="h-12 px-8" onClick={() => navigate(0)}>Refresh</Button>
             </div>
           </CardContent>
         </Card>

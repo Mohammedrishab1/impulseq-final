@@ -19,75 +19,78 @@ import { LoginPage, ForgotPasswordPage } from './pages/AuthPages';
 import { Toaster } from './components/ui/sonner';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminQueueDashboard } from './pages/AdminQueueDashboard';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Login & Portal */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        
-        {/* Public / Signage Routes */}
-        <Route path="/monitor" element={<LiveMonitorScreen />} />
-        
-        {/* Private Dashboards */}
-        <Route path="/super-admin" element={
-          <ProtectedRoute>
-            <DashboardLayout><SuperAdminDashboard /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/hospital-admin" element={
-          <ProtectedRoute>
-            <DashboardLayout><HospitalAdminDashboard /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/reception" element={
-          <ProtectedRoute>
-            <DashboardLayout><ReceptionDashboard /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/doctor" element={
-          <ProtectedRoute>
-            <DashboardLayout><DoctorDashboard /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/patient" element={
-          <ProtectedRoute>
-            <DashboardLayout><PatientDashboard /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/tokens" element={
-          <ProtectedRoute>
-            <DashboardLayout><TokenManagementDashboard /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/analytics" element={
-          <ProtectedRoute>
-            <DashboardLayout><AnalyticsDashboard /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/alerts" element={
-          <ProtectedRoute>
-            <DashboardLayout><AlertsCenter /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/settings" element={
-          <ProtectedRoute>
-            <DashboardLayout><SettingsPage /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/queue-admin" element={
-          <ProtectedRoute>
-            <DashboardLayout><AdminQueueDashboard /></DashboardLayout>
-          </ProtectedRoute>
-        } />
-        
-        {/* Default Redirect — send unauthenticated users to login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-      </Routes>
-      <Toaster position="top-right" />
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          {/* Login & Portal */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          
+          {/* Public / Signage Routes */}
+          <Route path="/monitor" element={<LiveMonitorScreen />} />
+          
+          {/* Private Dashboards */}
+          <Route path="/super-admin" element={
+            <ProtectedRoute>
+              <DashboardLayout><SuperAdminDashboard /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/hospital-admin" element={
+            <ProtectedRoute>
+              <DashboardLayout><HospitalAdminDashboard /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/reception" element={
+            <ProtectedRoute>
+              <DashboardLayout><ReceptionDashboard /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/doctor" element={
+            <ProtectedRoute>
+              <DashboardLayout><DoctorDashboard /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/patient" element={
+            <ProtectedRoute>
+              <DashboardLayout><PatientDashboard /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/tokens" element={
+            <ProtectedRoute>
+              <DashboardLayout><TokenManagementDashboard /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/analytics" element={
+            <ProtectedRoute>
+              <DashboardLayout><AnalyticsDashboard /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/alerts" element={
+            <ProtectedRoute>
+              <DashboardLayout><AlertsCenter /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <DashboardLayout><SettingsPage /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/queue-admin" element={
+            <ProtectedRoute>
+              <DashboardLayout><AdminQueueDashboard /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          {/* Default Redirect — send unauthenticated users to login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Routes>
+        <Toaster position="top-right" />
+      </Router>
+    </ErrorBoundary>
   );
 }

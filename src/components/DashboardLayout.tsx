@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Hospital, 
@@ -53,6 +53,7 @@ const navItems: NavItem[] = [
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const logout = () => {
@@ -61,7 +62,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("user_email");
     localStorage.removeItem("user_role");
     localStorage.removeItem("hospital_id");
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   const userEmail = localStorage.getItem("user_email") || "user@hospital.com";

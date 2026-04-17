@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   BarChart, 
   Bar, 
@@ -34,6 +35,7 @@ import { getPatients, getQueue, getPriorityQueue, getIoTData } from '@/lib/api';
 const COLORS = ['#0d9488', '#0891b2', '#0284c7', '#2563eb', '#f59e0b'];
 
 export function AnalyticsDashboard() {
+  const navigate = useNavigate();
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [patients, setPatients] = React.useState<any[]>([]);
@@ -154,7 +156,7 @@ export function AnalyticsDashboard() {
         <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
         <h3 className="text-xl font-bold text-slate-900 mb-2">Connection Error</h3>
         <p className="text-slate-600 mb-6">{error}</p>
-        <Button onClick={() => window.location.reload()}>Retry Connection</Button>
+        <Button onClick={() => navigate(0)}>Retry Connection</Button>
       </Card>
     );
   }

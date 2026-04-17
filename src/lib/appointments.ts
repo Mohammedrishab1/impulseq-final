@@ -107,7 +107,7 @@ export async function getPatientActiveAppointment(
     console.error("getPatientActiveAppointment error:", error.message);
     return null;
   }
-  
+
   return data && data.length > 0 ? (data[0] as Appointment) : null;
 }
 
@@ -154,10 +154,11 @@ export async function bookAppointment(params: {
 
   const existing = existingRecords && existingRecords.length > 0 ? existingRecords[0] : null;
 
-  if (existing) {
-    const normalizedRole = String(params.user_role).toLowerCase();
-    const canOverride = ["1", "admin", "superadmin", "super_admin", "2", "reception"].includes(normalizedRole);
+  // ✅ DEFINE ONCE HERE (GLOBAL FOR FUNCTION)
+  const normalizedRole = String(params.user_role ?? "").toLowerCase();
+  const canOverride = ["1", "admin", "superadmin", "super_admin", "2", "reception"].includes(normalizedRole);
 
+  if (existing) {
     if (canOverride) {
       console.log("Admin/Reception booking override triggered. Canceling previous token:", existing.id);
       // Auto-cancel previous active appointment
@@ -252,7 +253,7 @@ export async function updateStatus(id: string, status: 0 | 1 | 2 | 3, hospitalId
     .update({ status })
     .eq("id", id);
   if (error) throw error;
-  
+
   if (hospitalId) {
     await recalcAllETAs(hospitalId);
   }
@@ -334,7 +335,7 @@ export async function updatePatientMedicalPriority(patientId: string, doctorId: 
       notes,
       priority_flag: flag
     });
-    
+
   if (error) {
     console.error("Failed to update medical history:", error.message);
     throw new Error("Failed to set medical priority");
