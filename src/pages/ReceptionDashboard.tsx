@@ -30,22 +30,46 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { getPatients } from '@/lib/api';
-import { getHospitalsList, type Hospital } from '@/lib/appointments';
+import { getPatients, getCurrentUser } from '@/lib/api';
 import { useQueueTokens } from '@/hooks/useQueueTokens';
 import { createToken, callNextToken } from '@/lib/queue-tokens';
 import { toast } from 'sonner';
 
-// Read hospital from session
-function getSessionHospitalId(): string {
-  return localStorage.getItem('hospital_id') || '';
-}
-
 export function ReceptionDashboard() {
   const navigate = useNavigate();
-  const hospitalId = getSessionHospitalId();
+  const [hospitalId, setHospitalId] = React.useState(localStorage.getItem('hospital_id') || '');
+  const [isRecovering, setIsRecovering] = React.useState(!hospitalId);
   
   const { queue, loading, refreshQueue } = useQueueTokens(hospitalId);
+
+  // Session Recovery logic
+  React.useEffect(() => {
+    async function validateSession() {
+      if (!hospitalId) {
+        console.log("Attempting session recovery...");
+        try {
+          const user = await getCurrentUser();
+          if (user?.hospital_id) {
+            console.log("Session recovered:", user.hospital_id);
+            localStorage.setItem("hospital_id", user.hospital_id);
+            setHospitalId(user.hospital_id);
+          } else {
+            console.warn("No hospital assigned to current session.");
+            // If recovery fails, wait a bit then redirect
+            setTimeout(() => navigate('/login'), 2000);
+          }
+        } catch (err) {
+          console.error("Session recovery failed:", err);
+          navigate('/login');
+        } finally {
+          setIsRecovering(false);
+        }
+      } else {
+        setIsRecovering(false);
+      }
+    }
+    validateSession();
+  }, [hospitalId, navigate]);
   
   const [patients, setPatients] = React.useState<any[]>([]);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -122,6 +146,15 @@ export function ReceptionDashboard() {
       currentToken: currentToken?.token_number
     });
   }, [hospitalId, queue, loading, currentToken]);
+
+  if (isRecovering) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-slate-500 font-medium">Restoring hospital session...</p>
+      </div>
+    );
+  }
 
   // 1. Session Validation
   if (!hospitalId) {

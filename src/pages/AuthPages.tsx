@@ -49,6 +49,12 @@ export function LoginPage() {
       }
 
       // ── Store full session in localStorage ─────────────────────────────────
+      if (!data.hospital_id && String(data.role) !== 'admin') {
+        toast.error("Account Error: User is not assigned to any hospital");
+        setLoading(false);
+        return;
+      }
+
       localStorage.setItem("user_id", data.id ?? "");
       localStorage.setItem("user_email", data.email ?? "");
       localStorage.setItem("user_role", String(data.role ?? ""));

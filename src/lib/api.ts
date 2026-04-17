@@ -68,3 +68,21 @@ export const getHospitals = async () => {
   if (error) throw error;
   return data;
 };
+
+// Session Recovery
+export const getCurrentUser = async () => {
+  const userId = localStorage.getItem("user_id");
+  if (!userId) return null;
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, email, role, hospital_id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Auth recovery error:", error);
+    return null;
+  }
+  return data;
+};
