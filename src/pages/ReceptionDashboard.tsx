@@ -90,14 +90,23 @@ export function ReceptionDashboard() {
       toast.error('Please select a patient / valid session');
       return;
     }
+
     setIsBooking(true);
+
     try {
+      // 1. Create token
       await createToken(hospitalId, bookingForm.patient_id);
-      // Requirement 6: Success message
+
+      // 2. 🔥 Trigger ESP32
+      await supabase.from("esp32_trigger").insert({});
+
       toast.success("Token issued successfully");
+
       setShowBooking(false);
       setBookingForm({ patient_id: '' });
+
       refreshQueue();
+
     } catch (err: any) {
       console.error('Registration error:', err);
       toast.error(err.message || 'Token generation failed');
@@ -109,9 +118,17 @@ export function ReceptionDashboard() {
   const handleCallNext = async () => {
     setIsCalling(true);
     try {
+      // 1. Call next token
       await callNextToken(hospitalId);
+
+      // 2. 🔥 Trigger ESP32 (IMPORTANT)
+      await supabase.from("esp32_trigger").insert({});
+
       toast.success('Called next token successfully');
+
+      // 3. Refresh UI
       refreshQueue();
+
     } catch (err: any) {
       console.error('Call next error:', err);
       toast.error(err.message || 'Failed to call next token');
@@ -119,6 +136,7 @@ export function ReceptionDashboard() {
       setIsCalling(false);
     }
   };
+
 
   const filteredQueue = React.useMemo(() => {
     return queue.filter((q) =>
