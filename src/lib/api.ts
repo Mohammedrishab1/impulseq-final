@@ -71,18 +71,37 @@ export const getHospitals = async () => {
 
 // Session Recovery
 export const getCurrentUser = async () => {
-  const userId = localStorage.getItem("user_id");
-  if (!userId) return null;
+  try {
+    // 1. Primary: Use Auth Session
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (user) {
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, email, role, hospital_id")
+        .eq("id", user.id)
+        .maybeSingle();
 
-  const { data, error } = await supabase
-    .from("users")
-    .select("id, email, role, hospital_id")
-    .eq("id", userId)
-    .maybeSingle();
+      if (!error && data) return data;
+    }
 
-  if (error) {
-    console.error("Auth recovery error:", error);
+    // 2. Fallback: LocalStorage (historical/legacy)
+    const userId = localStorage.getItem("user_id");
+    if (!userId) return null;
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, email, role, hospital_id")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Auth recovery error:", error);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    console.error("Critical session failure:", err);
     return null;
   }
-  return data;
 };

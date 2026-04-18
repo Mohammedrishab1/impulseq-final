@@ -29,38 +29,30 @@ export const fetchQueue = async (hospitalId: string): Promise<QueueToken[]> => {
 };
 
 export const createToken = async (hospitalId: string, patientId: string): Promise<void> => {
-  // Requirement 1 & 2: Use RPC, no manual token_number
-  // Requirement 3: Ensure valid IDs are passed
   if (!hospitalId || !patientId) {
     throw new Error("Invalid Hospital or Patient ID");
   }
 
-  const { data, error } = await supabase.rpc("create_queue_token", {
+  const { error } = await supabase.rpc("create_queue_token", {
     p_patient_id: patientId,
     p_hospital_id: hospitalId,
   });
 
-  // Requirement 5: Specific error handling
   if (error) {
     console.error("Full Supabase RPC Error:", error);
+    
+    // Requirement 7: Specific error handling
     if (error.message.toLowerCase().includes("duplicate key")) {
-      throw new Error("Token already exists, retrying...");
+      throw new Error("Token already exists or patient already in queue");
     }
     if (error.message.toLowerCase().includes("row-level security") || error.code === '42501') {
-      throw new Error("Permission error");
+      throw new Error("Permission denied. Please login again.");
+    }
+    // Network errors usually manifest as failed fetches or specific codes
+    if (error.message.toLowerCase().includes("network") || error.message.toLowerCase().includes("fetch")) {
+      throw new Error("Network issue. Try again.");
     }
     throw error;
-  }
-
-  // Requirement 4: Notify ESP32 after successful creation
-  const { error: triggerError } = await supabase
-    .from("esp32_trigger")
-    .insert({});
-    
-  if (triggerError) {
-    console.error("ESP32 Trigger Notification Failed:", triggerError);
-    // We don't necessarily want to fail the whole process if trigger fails, 
-    // but the user wants "ESP32 triggers every time".
   }
 };
 
@@ -74,7 +66,7 @@ export const callNextToken = async (hospitalId: string): Promise<void> => {
     
   if (completeError) {
     console.error("Failed to complete old token", completeError);
-    // Continue even if fail, maybe there wasn't a status=1
+    // Continue anyway to prevent queue block
   }
 
   // 2. Fetch the next waiting token (status = 0 and lowest token_number)
@@ -86,7 +78,10 @@ export const callNextToken = async (hospitalId: string): Promise<void> => {
     .order("token_number", { ascending: true })
     .limit(1);
 
-  if (nextError) throw nextError;
+  if (nextError) {
+    if (nextError.code === '42501') throw new Error("Permission denied. Please login again.");
+    throw nextError;
+  }
 
   if (nextTokens && nextTokens.length > 0) {
     // 3. Mark it as active (status = 1)
@@ -95,7 +90,12 @@ export const callNextToken = async (hospitalId: string): Promise<void> => {
       .update({ status: 1 })
       .eq("id", nextTokens[0].id);
 
-    if (activeError) throw activeError;
+    if (activeError) {
+      if (activeError.code === '42501') throw new Error("Permission denied. Please login again.");
+      throw activeError;
+    }
+  } else {
+    throw new Error("No patients waiting in queue");
   }
 };
 

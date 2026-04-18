@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils';
 import { getPatients, getCurrentUser } from '@/lib/api';
 import { useQueueTokens } from '@/hooks/useQueueTokens';
 import { createToken, callNextToken } from '@/lib/queue-tokens';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 export function ReceptionDashboard() {
@@ -94,7 +95,26 @@ export function ReceptionDashboard() {
     setIsBooking(true);
 
     try {
-      // 1. Create token
+      // Requirement 3: Prevent duplicate active tokens per patient
+      const { data: existing, error: checkError } = await supabase
+        .from("queue_tokens")
+        .select("id")
+        .eq("patient_id", bookingForm.patient_id)
+        .in("status", [0, 1])
+        .limit(1);
+
+      if (checkError) {
+        if (checkError.code === '42501') throw new Error("Permission denied. Please login again.");
+        throw checkError;
+      }
+
+      if (existing && existing.length > 0) {
+        toast.error("Patient already has an active token");
+        setIsBooking(false);
+        return;
+      }
+
+      // 1. Create token (via RPC)
       await createToken(hospitalId, bookingForm.patient_id);
 
       // 2. 🔥 Trigger ESP32
@@ -104,11 +124,10 @@ export function ReceptionDashboard() {
 
       setShowBooking(false);
       setBookingForm({ patient_id: '' });
-
       refreshQueue();
 
     } catch (err: any) {
-      console.error('Registration error:', err);
+      console.error("Full Supabase Error:", err);
       toast.error(err.message || 'Token generation failed');
     } finally {
       setIsBooking(false);
@@ -130,7 +149,7 @@ export function ReceptionDashboard() {
       refreshQueue();
 
     } catch (err: any) {
-      console.error('Call next error:', err);
+      console.error("Full Supabase Error:", err);
       toast.error(err.message || 'Failed to call next token');
     } finally {
       setIsCalling(false);
