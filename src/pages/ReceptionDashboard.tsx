@@ -117,8 +117,12 @@ export function ReceptionDashboard() {
       // 1. Create token (via RPC)
       await createToken(hospitalId, bookingForm.patient_id);
 
-      // 2. 🔥 Trigger ESP32
-      await supabase.from("esp32_trigger").insert({});
+      // 2. 🔥 Trigger ESP32 (Safe/Non-blocking)
+      try {
+        await supabase.from("esp32_trigger").insert({});
+      } catch (triggerErr) {
+        console.warn("ESP32 trigger failed:", triggerErr);
+      }
 
       toast.success("Token issued successfully");
 
@@ -140,8 +144,12 @@ export function ReceptionDashboard() {
       // 1. Call next token
       await callNextToken(hospitalId);
 
-      // 2. 🔥 Trigger ESP32 (IMPORTANT)
-      await supabase.from("esp32_trigger").insert({});
+      // 2. 🔥 Trigger ESP32 (IMPORTANT - Safe/Non-blocking)
+      try {
+        await supabase.from("esp32_trigger").insert({});
+      } catch (triggerErr) {
+        console.warn("ESP32 trigger failed (callNext):", triggerErr);
+      }
 
       toast.success('Called next token successfully');
 
