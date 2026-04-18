@@ -28,35 +28,40 @@ export const fetchQueue = async (hospitalId: string): Promise<QueueToken[]> => {
   return data as any[];
 };
 
-export const createToken = async (hospitalId: string, patientId: string): Promise<QueueToken> => {
-  // Fetch latest token number
-  const { data: latestToken, error: latestError } = await supabase
-    .from("queue_tokens")
-    .select("token_number")
-    .eq("hospital_id", hospitalId)
-    // Only check tokens created today if you want daily reset, otherwise just overall highest. Assuming daily reset by date:
-    .gte("created_at", new Date().toISOString().split("T")[0] + "T00:00:00.000Z")
-    .order("token_number", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+export const createToken = async (hospitalId: string, patientId: string): Promise<void> => {
+  // Requirement 1 & 2: Use RPC, no manual token_number
+  // Requirement 3: Ensure valid IDs are passed
+  if (!hospitalId || !patientId) {
+    throw new Error("Invalid Hospital or Patient ID");
+  }
 
-  if (latestError) throw latestError;
+  const { data, error } = await supabase.rpc("create_queue_token", {
+    p_patient_id: patientId,
+    p_hospital_id: hospitalId,
+  });
 
-  const nextTokenNumber = latestToken && latestToken.token_number ? latestToken.token_number + 1 : 1;
+  // Requirement 5: Specific error handling
+  if (error) {
+    console.error("Full Supabase RPC Error:", error);
+    if (error.message.toLowerCase().includes("duplicate key")) {
+      throw new Error("Token already exists, retrying...");
+    }
+    if (error.message.toLowerCase().includes("row-level security") || error.code === '42501') {
+      throw new Error("Permission error");
+    }
+    throw error;
+  }
 
-  const { data, error } = await supabase
-    .from("queue_tokens")
-    .insert({
-      hospital_id: hospitalId,
-      patient_id: patientId,
-      token_number: nextTokenNumber,
-      status: 0,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data as QueueToken;
+  // Requirement 4: Notify ESP32 after successful creation
+  const { error: triggerError } = await supabase
+    .from("esp32_trigger")
+    .insert({});
+    
+  if (triggerError) {
+    console.error("ESP32 Trigger Notification Failed:", triggerError);
+    // We don't necessarily want to fail the whole process if trigger fails, 
+    // but the user wants "ESP32 triggers every time".
+  }
 };
 
 export const callNextToken = async (hospitalId: string): Promise<void> => {

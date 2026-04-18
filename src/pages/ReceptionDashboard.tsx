@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Search, 
-  UserPlus, 
-  Ticket, 
-  MapPin, 
-  Clock, 
+import {
+  Search,
+  UserPlus,
+  Ticket,
+  MapPin,
+  Clock,
   MoreVertical,
   Printer,
   CheckCircle2,
@@ -21,13 +21,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { getPatients, getCurrentUser } from '@/lib/api';
@@ -39,7 +39,7 @@ export function ReceptionDashboard() {
   const navigate = useNavigate();
   const [hospitalId, setHospitalId] = React.useState(localStorage.getItem('hospital_id') || '');
   const [isRecovering, setIsRecovering] = React.useState(!hospitalId);
-  
+
   const { queue, loading, refreshQueue } = useQueueTokens(hospitalId);
 
   // Session Recovery logic
@@ -70,7 +70,7 @@ export function ReceptionDashboard() {
     }
     validateSession();
   }, [hospitalId, navigate]);
-  
+
   const [patients, setPatients] = React.useState<any[]>([]);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [showBooking, setShowBooking] = React.useState(false);
@@ -79,10 +79,10 @@ export function ReceptionDashboard() {
   const [isCalling, setIsCalling] = React.useState(false);
 
   React.useEffect(() => {
-  if (showBooking) {
-    getPatients().then((p) => setPatients(p || []));
-  }
-}, [showBooking]);
+    if (showBooking) {
+      getPatients().then((p) => setPatients(p || []));
+    }
+  }, [showBooking]);
 
   const handleBook = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,8 +92,9 @@ export function ReceptionDashboard() {
     }
     setIsBooking(true);
     try {
-      const token = await createToken(hospitalId, bookingForm.patient_id);
-      toast.success(`Token #${token.token_number} issued successfully!`);
+      await createToken(hospitalId, bookingForm.patient_id);
+      // Requirement 6: Success message
+      toast.success("Token issued successfully");
       setShowBooking(false);
       setBookingForm({ patient_id: '' });
       refreshQueue();
@@ -135,7 +136,7 @@ export function ReceptionDashboard() {
   }, [queue]);
 
   const currentToken = queue.find(q => q.status === 1);
-  const nextWaitingTokens = queue.filter(q => q.status === 0).sort((a,b) => a.token_number - b.token_number).slice(0, 2);
+  const nextWaitingTokens = queue.filter(q => q.status === 0).sort((a, b) => a.token_number - b.token_number).slice(0, 2);
 
   // Debug Logging
   React.useEffect(() => {
@@ -328,8 +329,8 @@ export function ReceptionDashboard() {
             <div className="flex flex-col h-full justify-center gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <Input 
-                  placeholder="Search patient or token..." 
+                <Input
+                  placeholder="Search patient or token..."
                   className="pl-10 h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all text-base"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -338,7 +339,7 @@ export function ReceptionDashboard() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-primary text-white border-none shadow-xl shadow-primary/20 lg:col-span-2">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
@@ -355,10 +356,10 @@ export function ReceptionDashboard() {
                 <div className="text-3xl font-medium text-white/70">No Active Tokens</div>
               )}
             </div>
-            
+
             <div>
-              <Button 
-                onClick={handleCallNext} 
+              <Button
+                onClick={handleCallNext}
                 disabled={isCalling}
                 className="bg-white text-primary hover:bg-slate-10 font-bold h-14 px-6 text-lg rounded-xl shadow-lg"
               >
@@ -499,9 +500,9 @@ function QueueStatusBadge({ status }: { status: number }) {
     2: { label: 'Completed', className: 'bg-emerald-100 text-emerald-600 border-emerald-200' },
     3: { label: 'Cancelled', className: 'bg-rose-100 text-rose-600 border-rose-200' },
   };
-  
+
   const { label, className } = map[status] || map[0];
-  
+
   return (
     <Badge variant="outline" className={cn("rounded-full font-medium", className)}>
       {label}
