@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { supabase } from '@/lib/supabase';
+import { AnimatedFooter } from '@/components/AnimatedFooter';
 
 interface NavItem {
   title: string;
@@ -176,11 +177,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8 pb-12">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
         </main>
+        <AnimatedFooter />
       </div>
     </div>
   );
